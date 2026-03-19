@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dondassé Business – Transferts CFA ↔ DZD</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #112240;
+    --navy-light: #1e3a5f;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-pale: #f5e6c0;
+    --white: #ffffff;
+    --offwhite: #f8f6f0;
+    --text-muted: #8899aa;
+    --success: #2ecc71;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ─── LOGIN ─── */
+  #screen-login {
+    background: var(--navy);
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #screen-login::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    top: -100px; right: -150px;
+    border-radius: 50%;
+  }
+  #screen-login::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(30,58,95,0.8) 0%, transparent 70%);
+    bottom: -80px; left: -80px;
+    border-radius: 50%;
+  }
+
+  .login-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 24px;
+    padding: 48px 44px;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo .logo-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+  }
+  .login-logo h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    letter-spacing: 0.5px;
+  }
+  .login-logo p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .form-group input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: all 0.3s;
+    outline: none;
+  }
+  .form-group input:focus {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.07);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+  .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none;
+    border-radius: 12px;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(201,168,76,0.4); }
+  .btn-primary:hover::after { opacity: 1; }
+
+  .secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .secure-badge span { color: var(--success); font-size: 14px; }
+
+  /* ─── EXCHANGE SELECTION ─── */
+  #screen-select {
+    background: var(--navy);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 32px;
+    padding: 40px 20px;
+  }
+
+  .select-header { text-align: center; }
+  .select-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .select-header p { color: var(--text-muted); font-size: 15px; }
+
+  .exchange-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .exchange-card {
+    background: var(--navy-mid);
+    border: 2px solid rgba(201,168,76,0.2);
+    border-radius: 20px;
+    padding: 36px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    animation: fadeUp 0.6s ease both;
+  }
+  .exchange-card:nth-child(2) { animation-delay: 0.1s; }
+  .exchange-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 24px 60px rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.08);
+  }
+  .exchange-card .card-icon {
+    font-size: 42px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .exchange-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .exchange-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .exchange-card .rate-badge {
+    margin-top: 14px;
+    display: inline-block;
+    background: rgba(201,168,76,0.15);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* ─── MAIN SITE (NAV + SECTIONS) ─── */
+  #screen-main { flex-direction: column; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,22,40,0.95);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(201,168,76,0.12);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+  .nav-logo .logo-dot {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .nav-logo span {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--white);
+  }
+
+  .nav-links {
+    display: flex;
+    list-style: none;
+    gap: 36px;
+  }
+  .nav-links a {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s;
+    cursor: pointer;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    padding: 120px 40px 80px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--navy);
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(30,58,95,0.6) 0%, transparent 70%),
+      radial-gradient(circle at 10% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 50px;
+    padding: 8px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold-light);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 1.15;
+    color: var(--white);
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.7;
+    margin-bottom: 40px;
+    max-width: 500px;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .btn-gold {
+    padding: 15px 32px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border: none;
+    border-radius: 12px;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(201,168,76,0.35); }
+
+  .btn-outline {
+    padding: 15px 32px;
+    background: transparent;
+    border: 2px solid rgba(201,168,76,0.4);
+    border-radius: 12px;
+    color: var(--gold-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-outline:hover {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    transform: translateY(-3px);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 60px;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .hero-visual {
+    position: absolute;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .floating-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    padding: 24px;
+    width: 280px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  }
+  .floating-card .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .fc-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .fc-live {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--success);
+    font-weight: 600;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  .fc-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .fc-currency {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .fc-arrow {
+    text-align: center;
+    font-size: 20px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+  .fc-result {
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .fc-result-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .fc-result-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold-light);
+  }
+  .fc-result-currency { font-size: 12px; color: var(--text-muted); }
+
+  /* ─── SECTION GENERIC ─── */
+  section {
+    padding: 100px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .section-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 3vw, 44px);
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .section-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 500px;
+    line-height: 1.7;
+  }
+
+  /* ─── CONVERSION SECTION ─── */
+  .conversion-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 60px;
+    align-items: center;
+    margin-top: 60px;
+  }
+
+  .converter-box {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+  }
+
+  .direction-tabs {
+    display: flex;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+    gap: 4px;
+  }
+  .direction-tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .direction-tab.active {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+  }
+
+  .input-currency-group {
+    position: relative;
+    margin-bottom: 16px;
+  }
+  .input-currency-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .input-with-badge {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .input-with-badge:focus-within {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+  }
+  .currency-badge {
+    padding: 14px 16px;
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 700;
+    border-right: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: center;
+  }
+  .input-with-badge input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 14px 16px;
+    color: var(--white);
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    outline: none;
+    width: 100%;
+  }
+  .input-with-badge input::placeholder { color: rgba(255,255,255,0.2); }
+
+  .swap-icon {
+    text-align: center;
+    font-size: 22px;
+    color: var(--gold);
+    margin: 12px 0;
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  .result-display {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.05));
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 14px;
+    padding: 20px 20px;
+    margin-top: 10px;
+    transition: all 0.4s;
+  }
+  .result-display .result-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .result-display .result-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    color: var(--gold-light);
+    transition: all 0.4s;
+  }
+  .result-display .result-currency {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .result-display .result-rate {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 10px;
+  }
+
+  .features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .feature-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 24px;
+    background: var(--navy-mid);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: all 0.3s;
+  }
+  .feature-item:hover {
+    border-color: rgba(201,168,76,0.2);
+    transform: translateX(6px);
+  }
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .feature-text h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+  .feature-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ─── RATES TABLE ─── */
+  .rates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .rate-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .rate-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  }
+  .rate-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    border-color: rgba(201,168,76,0.4);
+  }
+  .rate-card .from {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .rate-card .from span { font-size: 14px; color: var(--text-muted); }
+  .rate-card .arrow { font-size: 24px; color: var(--gold); margin: 12px 0; }
+  .rate-card .to {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold-light);
+    margin-bottom: 6px;
+  }
+  .rate-card .to span { font-size: 14px; color: var(--text-muted); }
+  .rate-card .rate-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ─── CONTACT ─── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .contact-card {
+    background: var(--navy-mid);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    transition: all 0.35s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .contact-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-8px);
+    box-shadow: 0 24px 60px rgba(201,168,76,0.15);
+  }
+  .contact-card .c-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .contact-card h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .contact-card p {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--white);
+  }
+
+  /* ─── CTA ─── */
+  .cta-section {
+    padding: 100px 40px;
+    background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+  }
+  .cta-section .content { position: relative; z-index: 1; }
+  .cta-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 52px);
+    color: var(--white);
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .cta-section p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 40px;
+  }
+  .rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 50px;
+    padding: 10px 20px;
+    margin-bottom: 40px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+  .trust-badges {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+  }
+  .trust-item span { font-size: 16px; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(201,168,76,0.1);
+    padding: 32px 40px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  footer strong { color: var(--gold); }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.15), transparent);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(-50%); }
+    50% { transform: translateY(calc(-50% - 18px)); }
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(6px); }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.5); }
+  }
+
+  .scroll-reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.7s ease;
+  }
+  .scroll-reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .hero-visual { display: none; }
+    .exchange-cards { grid-template-columns: 1fr; }
+    .conversion-wrapper { grid-template-columns: 1fr; gap: 32px; }
+    .rates-grid { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    section { padding: 60px 20px; }
+    .hero-stats { gap: 24px; flex-wrap: wrap; }
+    .login-card { padding: 32px 24px; margin: 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .trust-badges { gap: 16px; }
+    .cta-section { padding: 60px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ LOGIN ═══ -->
+<div id="screen-login" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">💱</div>
+      <h1>Dondassé Business</h1>
+      <p>Transferts CFA ↔ DZD · Sécurisé & Rapide</p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom</label>
+        <input type="text" id="fname" placeholder="ex: Amadou" />
+      </div>
+      <div class="form-group">
+        <label>Nom</label>
+        <input type="text" id="lname" placeholder="ex: Ouédraogo" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Numéro de téléphone</label>
+      <input type="tel" id="phone" placeholder="+226 / +213..." />
+    </div>
+
+    <div class="form-group">
+      <label>Adresse e-mail</label>
+      <input type="email" id="email" placeholder="vous@email.com" />
+    </div>
+
+    <button class="btn-primary" onclick="goToSelect()">Continuer →</button>
+
+    <div class="secure-badge">
+      <span>🔒</span> Connexion sécurisée SSL · Données protégées
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ SELECT ═══ -->
+<div id="screen-select" class="screen">
+  <div class="select-header">
+    <h2>Choisissez votre opération</h2>
+    <p>Sélectionnez la direction de votre transfert</p>
+  </div>
+
+  <div class="exchange-cards">
+    <div class="exchange-card" onclick="goToMain()">
+      <span class="card-icon">🌍➡️🇩🇿</span>
+      <h3>CFA → Dinar</h3>
+      <p>Envoyer des francs CFA vers l'Algérie</p>
+      <div class="rate-badge">50 000 XOF = 19 500 DZD</div>
+    </div>
+    <div class="exchange-card" onclick="goToMain()">
+      <span class="card-icon">🇩🇿➡️🌍</span>
+      <h3>Dinar → CFA</h3>
+      <p>Envoyer des dinars vers l'Afrique Centrale</p>
+      <div class="rate-badge">22 000 DZD = 50 000 XOF</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ MAIN SITE ═══ -->
+<div id="screen-main" class="screen">
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="logo-dot">💱</div>
+      <span>Dondassé Business</span>
+    </a>
+    <ul class="nav-links">
+      <li><a onclick="scrollTo('#accueil')">Accueil</a></li>
+      <li><a onclick="scrollTo('#conversion')">Conversion</a></li>
+      <li><a onclick="scrollTo('#tarifs')">Tarifs</a></li>
+      <li><a onclick="scrollTo('#contact')">Contact</a></li>
+    </ul>
+    <button class="btn-gold" style="font-size:13px;padding:10px 22px;" onclick="scrollTo('#cta')">Commencer</button>
+  </nav>
+
+  <!-- HERO -->
+  <div id="accueil" class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+
+    <div class="hero-content">
+      <div class="hero-badge">🌍 Afrique ↔ Algérie · Transfert Rapide</div>
+      <h1>Bienvenue chez<br/><em>Dondassé Business</em></h1>
+      <p class="hero-sub">Transferts rapides, sécurisés et fiables entre l'Afrique Centrale et l'Algérie. CFA et Dinar algérien — simple, transparent, en un clic.</p>
+      <div class="hero-actions">
+        <button class="btn-gold" onclick="scrollTo('#conversion')">Convertir maintenant</button>
+        <button class="btn-outline" onclick="scrollTo('#contact')">Nous contacter</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <h3>4.9 ⭐</h3>
+          <p>Note clients</p>
+        </div>
+        <div class="stat">
+          <h3>24h</h3>
+          <p>Délai max</p>
+        </div>
+        <div class="stat">
+          <h3>100%</h3>
+          <p>Sécurisé</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="floating-card">
+        <div class="card-top">
+          <span class="fc-label">Transfert en cours</span>
+          <span class="fc-live"><span class="live-dot"></span> EN DIRECT</span>
+        </div>
+        <div class="fc-amount">50 000</div>
+        <div class="fc-currency">Francs CFA (XOF)</div>
+        <div class="fc-arrow">⬇️</div>
+        <div class="fc-result">
+          <div class="fc-result-label">Vous recevez</div>
+          <div class="fc-result-amount">19 500</div>
+          <div class="fc-result-currency">Dinars Algériens (DZD)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONVERSION -->
+  <section id="conversion">
+    <div class="scroll-reveal">
+      <span class="section-label">💱 Calculatrice</span>
+      <h2 class="section-title">Conversion en temps réel</h2>
+      <p class="section-sub">Entrez votre montant et obtenez instantanément le résultat du taux de change appliqué.</p>
+    </div>
+
+    <div class="conversion-wrapper scroll-reveal">
+      <div class="converter-box">
+        <div class="direction-tabs">
+          <button class="direction-tab active" id="tab-cfa" onclick="setDirection('cfa')">CFA → DZD</button>
+          <button class="direction-tab" id="tab-dzd" onclick="setDirection('dzd')">DZD → CFA</button>
+        </div>
+
+        <div class="input-currency-group">
+          <label id="from-label">Montant en CFA</label>
+          <div class="input-with-badge">
+            <div class="currency-badge" id="from-badge">XOF</div>
+            <input type="number" id="amount-input" placeholder="50 000" oninput="convertAmount()" />
+          </div>
+        </div>
+
+        <div class="swap-icon">⬇️</div>
+
+        <div class="result-display">
+          <div class="result-label" id="to-label">Vous recevez en DZD</div>
+          <div class="result-value" id="result-value">0</div>
+          <div class="result-currency" id="result-currency">Dinars Algériens</div>
+          <div class="result-rate" id="result-rate">Taux : 1 XOF = 0.39 DZD</div>
+        </div>
+      </div>
+
+      <div class="features-list">
+        <div class="feature-item">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-text">
+            <h4>Transfert Ultra-Rapide</h4>
+            <p>Vos fonds arrivent en moins de 24h, souvent en quelques heures seulement.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">🔒</div>
+          <div class="feature-text">
+            <h4>100% Sécurisé</h4>
+            <p>Chaque transaction est vérifiée et protégée. Votre argent est entre de bonnes mains.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">💰</div>
+          <div class="feature-text">
+            <h4>Meilleur Taux</h4>
+            <p>Des taux de change compétitifs sans frais cachés. Ce que vous voyez est ce que vous obtenez.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- TARIFS -->
+  <section id="tarifs">
+    <div class="scroll-reveal" style="text-align:center;">
+      <span class="section-label">📊 Tarifs officiels</span>
+      <h2 class="section-title">Taux de change appliqués</h2>
+      <p class="section-sub" style="margin:0 auto;">Nos taux sont transparents, fixes et annoncés clairement. Aucune surprise au moment du transfert.</p>
+    </div>
+
+    <div class="rates-grid scroll-reveal">
+      <div class="rate-card">
+        <div class="from">50 000 <span>XOF</span></div>
+        <div class="arrow">⬇️</div>
+        <div class="to">19 500 <span>DZD</span></div>
+        <div class="rate-label">🌍 Afrique Centrale → 🇩🇿 Algérie</div>
+      </div>
+      <div class="rate-card">
+        <div class="from">22 000 <span>DZD</span></div>
+        <div class="arrow">⬇️</div>
+        <div class="to">50 000 <span>XOF</span></div>
+        <div class="rate-label">🇩🇿 Algérie → 🌍 Afrique Centrale</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="scroll-reveal" style="text-align:center;">
+      <span class="section-label">📞 Contact</span>
+      <h2 class="section-title">Nous sommes disponibles</h2>
+      <p class="section-sub" style="margin:0 auto;">Contactez-nous par téléphone, WhatsApp ou Snapchat. Réponse rapide garantie.</p>
+    </div>
+
+    <div class="contact-grid scroll-reveal">
+      <a class="contact-card" href="tel:+213670046825">
+        <span class="c-icon">📞</span>
+        <h3>Téléphone</h3>
+        <p>+213 670 046 825</p>
+      </a>
+      <a class="contact-card" href="https://wa.me/22657046033" target="_blank">
+        <span class="c-icon">💬</span>
+        <h3>WhatsApp</h3>
+        <p>+226 570 460 33</p>
+      </a>
+      <a class="contact-card" href="#" onclick="alert('Snapchat : abdoulazizdon25')">
+        <span class="c-icon">👻</span>
+        <h3>Snapchat</h3>
+        <p>abdoulazizdon25</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div id="cta" class="cta-section">
+    <div class="content">
+      <div class="rating-badge">⭐ 4.9 / 5 · Note de nos clients</div>
+      <h2>Recevez votre argent<br/>en un clic</h2>
+      <p>Simple, rapide et efficace</p>
+      <button class="btn-gold" style="font-size:16px;padding:18px 48px;" onclick="scrollTo('#conversion')">
+        Commencer un transfert →
+      </button>
+      <div class="trust-badges">
+        <div class="trust-item"><span>🔒</span> Transfert Sécurisé</div>
+        <div class="trust-item"><span>⚡</span> Livraison Rapide</div>
+        <div class="trust-item"><span>💯</span> Taux Transparents</div>
+        <div class="trust-item"><span>🌍</span> Afrique & Algérie</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 <strong>Dondassé Business</strong> · Transferts CFA ↔ DZD · Tous droits réservés
+  </footer>
+
+</div><!-- end screen-main -->
+
+<script>
+  // ─── NAVIGATION ───
+  function goToSelect() {
+    const fname = document.getElementById('fname').value.trim();
+    if (!fname) {
+      document.getElementById('fname').focus();
+      document.getElementById('fname').style.borderColor = 'var(--gold)';
+      return;
+    }
+    switchScreen('screen-login', 'screen-select');
+  }
+
+  function goToMain() {
+    switchScreen('screen-select', 'screen-main');
+    setTimeout(initScrollReveal, 100);
+  }
+
+  function switchScreen(fromId, toId) {
+    document.getElementById(fromId).classList.remove('active');
+    const to = document.getElementById(toId);
+    to.classList.add('active');
+    to.style.animation = 'fadeUp 0.5s ease both';
+  }
+
+  function scrollTo(selector) {
+    const el = document.querySelector(selector);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ─── CONVERTER ───
+  let direction = 'cfa'; // 'cfa' or 'dzd'
+  const RATE_CFA_TO_DZD = 19500 / 50000; // 0.39
+  const RATE_DZD_TO_CFA = 50000 / 22000; // ~2.2727
+
+  function setDirection(dir) {
+    direction = dir;
+    document.getElementById('tab-cfa').classList.toggle('active', dir === 'cfa');
+    document.getElementById('tab-dzd').classList.toggle('active', dir === 'dzd');
+
+    if (dir === 'cfa') {
+      document.getElementById('from-label').textContent = 'Montant en CFA';
+      document.getElementById('from-badge').textContent = 'XOF';
+      document.getElementById('to-label').textContent = 'Vous recevez en DZD';
+      document.getElementById('result-currency').textContent = 'Dinars Algériens';
+      document.getElementById('result-rate').textContent = 'Taux : 50 000 XOF = 19 500 DZD';
+    } else {
+      document.getElementById('from-label').textContent = 'Montant en DZD';
+      document.getElementById('from-badge').textContent = 'DZD';
+      document.getElementById('to-label').textContent = 'Vous recevez en CFA';
+      document.getElementById('result-currency').textContent = 'Francs CFA';
+      document.getElementById('result-rate').textContent = 'Taux : 22 000 DZD = 50 000 XOF';
+    }
+    document.getElementById('amount-input').value = '';
+    document.getElementById('result-value').textContent = '0';
+  }
+
+  function convertAmount() {
+    const amt = parseFloat(document.getElementById('amount-input').value) || 0;
+    let result = 0;
+    if (direction === 'cfa') {
+      result = amt * RATE_CFA_TO_DZD;
+    } else {
+      result = amt * RATE_DZD_TO_CFA;
+    }
+    const el = document.getElementById('result-value');
+    el.style.transform = 'scale(1.05)';
+    el.style.color = 'var(--gold-light)';
+    setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+    el.textContent = Math.round(result).toLocaleString('fr-FR');
+  }
+
+  // ─── SCROLL REVEAL ───
+  function initScrollReveal() {
+    const els = document.querySelectorAll('.scroll-reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    els.forEach(el => observer.observe(el));
+  }
+</script>
+</body>
+</html>
